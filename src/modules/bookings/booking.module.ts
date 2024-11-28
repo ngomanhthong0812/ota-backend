@@ -5,8 +5,8 @@ import { BookingService } from './booking.service';
 import { BookingEntity } from 'src/entities/booking.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([BookingEntity])],
-    controllers: [BookingController],
-    providers: [BookingService],
+  imports: [TypeOrmModule.forFeature([BookingEntity])],
+  controllers: [BookingController],
+  providers: [BookingService],
 })
 export class BookingModule {}

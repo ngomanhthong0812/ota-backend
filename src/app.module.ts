@@ -31,6 +31,7 @@ import { TransactionEntity } from './entities/transaction.entity';
 import { BankTransactionEntity } from './entities/bankTransaction.entity';
 import { CashTransactionEntity } from './entities/cashTransaction.entity';
 import { TransactionModule } from './modules/Transaction/transaction.module';
+import { FloorModule } from './modules/floor/floor.module';
 
 @Module({
   imports: [
@@ -94,6 +95,7 @@ import { TransactionModule } from './modules/Transaction/transaction.module';
     CustomerModule,
     InvoiceModule,
     TransactionModule,
+    FloorModule,
   ],
   controllers: [AppController],
   providers: [

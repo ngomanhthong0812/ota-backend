@@ -26,9 +26,9 @@ import { RoleModule } from 'src/modules/roles/role.module';
       }),
       inject: [ConfigService],
     }),
-    PassportModule
+    PassportModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, JwtStrategy],
 })
-export class AuthModule { }
+export class AuthModule {}

@@ -96,7 +96,7 @@ export class TransactionController {
       );
     } catch (error) {}
   }
-  @Get('bank')  
+  @Get('bank')
   @UseGuards(JwtAuthGuard)
   async getBankTransactionsByHotelId(
     @GetUser()

@@ -1,13 +1,13 @@
 export class ResponData<D> {
-    data: D | D[];
-    statusCode: number;
-    message: string;
+  data: D | D[];
+  statusCode: number;
+  message: string;
 
-    constructor(data: D | D[], statusCode: number, message: string) {
-        this.data = data;
-        this.statusCode = statusCode;
-        this.message = message;
+  constructor(data: D | D[], statusCode: number, message: string) {
+    this.data = data;
+    this.statusCode = statusCode;
+    this.message = message;
 
-        return this;
-    }
+    return this;
+  }
 }

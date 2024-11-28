@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { UserService } from 'src/modules/users/user.service';
 import { JwtService } from '@nestjs/jwt';
@@ -16,8 +15,8 @@ export class AuthService {
     private hotelService: HotelService,
     private roleService: RoleService,
     private jwtService: JwtService,
-    private readonly mailerService: MailerService
-  ) { }
+    private readonly mailerService: MailerService,
+  ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
     let user = await this.userService.finByUserName(username);
@@ -25,7 +24,7 @@ export class AuthService {
       user = await this.userService.finByEmail(username);
     }
 
-    if (!user) return null
+    if (!user) return null;
 
     const isValidPassword = await comparePasswordHelper(pass, user.password);
     if (!isValidPassword) return null;
@@ -55,8 +54,13 @@ export class AuthService {
     if (await this.userService.isUserNameExistGlobal(registerDto.username)) {
       throw new Error('Tên tài khoản đã được sử dụng');
     }
-    const hotel_id = await this.hotelService.createHotelRegister(registerDto.name_hotel, registerDto.email);
-    const role_id = await this.roleService.getRoleIdByName(registerDto.role_name);
+    const hotel_id = await this.hotelService.createHotelRegister(
+      registerDto.name_hotel,
+      registerDto.email,
+    );
+    const role_id = await this.roleService.getRoleIdByName(
+      registerDto.role_name,
+    );
 
     if (!hotel_id) {
       throw new Error('Không thể tạo khách sạn.');
@@ -65,7 +69,13 @@ export class AuthService {
       throw new Error('Không thể lấy ID của role.');
     }
 
-    const user = await this.userService.createUserRegister(registerDto.username, registerDto.email, registerDto.password, hotel_id, role_id);
+    const user = await this.userService.createUserRegister(
+      registerDto.username,
+      registerDto.email,
+      registerDto.password,
+      hotel_id,
+      role_id,
+    );
 
     this.sendMail(user.id, user.email, user.user_name, user.code);
 
@@ -86,21 +96,21 @@ export class AuthService {
     if (code) {
       await this.userService.updateCodeById(id, code);
     }
-    this.mailerService
-      .sendMail({
-        to: toEmail, // list of receivers
-        subject: 'Testing Nest MailerModule ✔', // Subject line
-        text: 'welcome OTA', // plaintext body
-        template: "register",
-        context: { // ✏️ filling curly brackets with content
-          name: name,
-          activationCode: code,
-        },
-      })
+    this.mailerService.sendMail({
+      to: toEmail, // list of receivers
+      subject: 'Testing Nest MailerModule ✔', // Subject line
+      text: 'welcome OTA', // plaintext body
+      template: 'register',
+      context: {
+        // ✏️ filling curly brackets with content
+        name: name,
+        activationCode: code,
+      },
+    });
   }
 
   async activeCode(id: number, code: string) {
     await this.userService.updateIsActiveByIdAndCode(id, code);
-    return "ok";
+    return 'ok';
   }
 }

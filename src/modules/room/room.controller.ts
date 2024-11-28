@@ -17,7 +17,7 @@ import { UpdateRoomDto } from './dto/updateRoom.dto';
 
 @Controller('room')
 export class roomController {
-  constructor(private readonly roomService: RoomService) { }
+  constructor(private readonly roomService: RoomService) {}
   @Post()
   async create(
     @Body(new ValidationPipe()) createRoomDto: CreateRoomDto,
@@ -73,6 +73,16 @@ export class roomController {
     }
   }
 
+  @Get('typeRoom-price')
+  async getTypeRoomWithPrice(): Promise<ResponData<any>> {
+    try {
+      const rooms = await this.roomService.getTypeRoomWithPrice();
+      return new ResponData(rooms, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+    } catch (error) {
+      return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
+    }
+  }
+
   // Lấy phòng theo ID
   @Get(':id')
   async getOne(@Param('id') id: number): Promise<ResponData<string>> {
@@ -93,5 +103,4 @@ export class roomController {
       return new ResponData(null, HttpStatus.ERROR, HttpMessage.ERROR);
     }
   }
-
 }
