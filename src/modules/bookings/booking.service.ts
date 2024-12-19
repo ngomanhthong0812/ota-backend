@@ -476,12 +476,13 @@ export class BookingService {
         'invoice_payment.amount AS paid_amount', // Tiền khách đã trả
         'invoice.total_amount AS total_amount',
       ])
-      .groupBy(
-        'booking.id, customer.name, room.name, room_type.code, room_type.name, booking_room.price, invoice.total_amount, invoice_payment.amount, booking.check_out_at',
-      )
       .orderBy('booking.booking_at', 'DESC') // Sắp xếp theo ngày đặt từ cao đến thấp
       .getRawMany();
-    const groupedData = rawData.reduce((acc, item) => {
+
+    // Bảo toàn thứ tự sau khi nhóm dữ liệu
+    const groupedData = new Map<number, any>();
+
+    rawData.forEach((item) => {
       const {
         booking_id,
         booking_status,
@@ -505,8 +506,8 @@ export class BookingService {
       // Tính tổng tiền của phòng: room_price * nightCount
       const roomTotalAmount = room_price * nightCount;
 
-      if (!acc[booking_id]) {
-        acc[booking_id] = {
+      if (!groupedData.has(booking_id)) {
+        groupedData.set(booking_id, {
           booking_id,
           booking_status,
           booking_time,
@@ -516,10 +517,10 @@ export class BookingService {
           paid_amount: paid_amount || 0,
           total_amount_to_pay: total_amount - paid_amount,
           rooms: [],
-        };
+        });
       }
 
-      acc[booking_id].rooms.push({
+      groupedData.get(booking_id).rooms.push({
         room_name,
         room_type_code,
         room_type_name,
@@ -527,10 +528,9 @@ export class BookingService {
         room_total_amount: roomTotalAmount, // Thêm tổng tiền của phòng vào kết quả
         room_night_count: nightCount, // Thêm số ngày vào phòng
       });
+    });
 
-      return acc;
-    }, {});
-
-    return Object.values(groupedData);
+    // Trả về danh sách với thứ tự bảo toàn từ `rawData`
+    return Array.from(groupedData.values());
   }
 }

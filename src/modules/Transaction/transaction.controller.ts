@@ -316,4 +316,19 @@ export class TransactionController {
       res.status(500).send('Error exporting transactions');
     }
   }
+
+  @Get('hotel/:hotelId')
+  async getTransactionsByHotel(@Param('hotelId') hotelId: number) {
+    try {
+      const getTransactionsByHotel =
+        await this.TransactionService.getTransactionsByHotel(hotelId);
+      return new ResponData(
+        getTransactionsByHotel,
+        HttpStatus.SUCCESS,
+        HttpMessage.SUCCESS,
+      );
+    } catch (error) {
+      return new ResponData(null, HttpStatus.SUCCESS, HttpMessage.SUCCESS);
+    }
+  }
 }

@@ -726,4 +726,89 @@ export class TransactionService {
       transactions: result,
     };
   }
+
+  async getTransactionsByHotel(hotelId: number) {
+    const transactions = await this.transactionRepository.find({
+      where: { hotel_id: hotelId },
+      relations: ['user', 'bankTransaction', 'cashTransaction'],
+      order: { created_at: 'DESC' },
+    });
+  
+    if (!transactions || transactions.length === 0) {
+      throw new NotFoundException(
+        `No transactions found for hotel ID ${hotelId}`,
+      );
+    }
+  
+    // Tính tổng tiền cho từng loại giao dịch
+    const totals = {
+      cashIncome: 0, // Tổng thu tiền mặt
+      cashExpense: 0, // Tổng chi tiền mặt
+      bankIncome: 0, // Tổng thu chuyển khoản
+      bankExpense: 0, // Tổng chi chuyển khoản
+      totalIncome: 0, // Tổng thu (cash + bank)
+      totalExpense: 0, // Tổng chi (cash + bank)
+      totalNet: 0, // Thu - Chi
+    };
+  
+    transactions.forEach((transaction) => {
+      const { transactionType, paymentType, amount } = transaction;
+  
+      if (paymentType === 'cash') {
+        if (transactionType === 'income') {
+          totals.cashIncome += Number(amount);
+          totals.totalIncome += Number(amount); // Cộng vào tổng thu
+        } else if (transactionType === 'expense') {
+          totals.cashExpense += Number(amount);
+          totals.totalExpense += Number(amount); // Cộng vào tổng chi
+        }
+      } else if (paymentType === 'bank') {
+        if (transactionType === 'income') {
+          totals.bankIncome += Number(amount);
+          totals.totalIncome += Number(amount); // Cộng vào tổng thu
+        } else if (transactionType === 'expense') {
+          totals.bankExpense += Number(amount);
+          totals.totalExpense += Number(amount); // Cộng vào tổng chi
+        }
+      }
+    });
+  
+    // Tính tổng chênh lệch giữa thu và chi (thu - chi)
+    totals.totalNet = totals.totalIncome - totals.totalExpense;
+  
+    // Map kết quả giao dịch
+    const result = transactions.map((transaction) => ({
+      id: transaction.id,
+      code: transaction.code,
+      content: transaction.content,
+      amount: transaction.amount,
+      transactionType: transaction.transactionType,
+      paymentType: transaction.paymentType,
+      isHandedOver: transaction.isHandedOver,
+      createdAt: transaction.created_at,
+      updatedAt: transaction.updated_at,
+      status: transaction.status,
+      user: transaction.user
+        ? {
+            id: transaction.user.id,
+            name: transaction.user.user_name,
+          }
+        : null,
+      bankTransaction: transaction.bankTransaction
+        ? {
+            receiverAccount: transaction.bankTransaction.receiverAccount,
+            receiverName: transaction.bankTransaction.receiverName,
+            bankAmount: transaction.bankTransaction.bankAmount,
+          }
+        : null,
+      cashTransaction: transaction.cashTransaction
+        ? {
+            cashAmount: transaction.cashTransaction.cashAmount,
+          }
+        : null,
+    }));
+  
+    return { totals, transactions: result };
+  }
+  
 }
